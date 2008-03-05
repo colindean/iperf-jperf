@@ -1,0 +1,46 @@
+<project name="JPerf 2.0 builder">
+	<property name="project.root" value=".."/>
+	<property name="project.src.dir" value="${project.root}/src"/>
+	<property name="project.lib.dir" value="${project.root}/lib"/>
+	<property name="project.release.dir" value="${project.root}/release"/>
+	<property name="project.filename" value="jperf2.0.0"/>
+	
+	<path id="project.classpath">
+		<fileset dir="${project.lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="release">
+		<mkdir dir="${project.release.dir}/classes"/>
+		<javac 
+			classpathref="project.classpath"
+			destdir="${project.release.dir}/classes">
+			<src path="${project.src.dir}"/>
+		</javac>
+		<copy todir="${project.release.dir}/classes">
+			<fileset dir="${project.src.dir}">
+				<include name="**/*"/>
+				<exclude name="**/*.java"/>
+				<exclude name="**/.svn"/>
+			</fileset>
+		</copy>
+		<jar destfile="${project.release.dir}/${project.filename}.jar">
+			<fileset dir="${project.release.dir}/classes">
+				<include name="**/*"/>
+			</fileset>
+		</jar>
+		<delete dir="${project.release.dir}/classes" includeemptydirs="true" />
+		<copy todir="${project.release.dir}/lib">
+			<fileset dir="${project.lib.dir}" />
+		</copy>
+	</target>
+	
+	<target name="create distrib" depends="release">
+		<zip destfile="${project.root}/${project.filename}.zip">
+			<fileset dir="${project.release.dir}">
+				<exclude name="**/.svn"/>
+			</fileset>
+		</zip>
+	</target>
+</project>
