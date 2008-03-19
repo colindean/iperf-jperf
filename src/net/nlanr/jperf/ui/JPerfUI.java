@@ -1,7 +1,9 @@
 /*
  * - 02/2008: Class updated by Nicolas Richasse
+ * - 03/2008: Class updated by Nicolas Richasse
  * 
  * Changelog:
+ *-02/2008:
  * 	- code refactoring
  * 	- UI improved with the SwingX API and the Forms library
  * 	- graphs display improved
@@ -10,6 +12,9 @@
  *  - the output window automatically scrolls as the output goes beyond the end of it
  *  - some bugs fixed when parsing the iperf output
  *	
+ *-03/2008:
+ *  - the server port changes did not update the iperf command label
+ *  
  * To do: 
  * 	- ...
  *  
@@ -339,6 +344,7 @@ public class JPerfUI extends JFrame
 			lb_listenPort.setOpaque(false);
 			lb_listenPort.setToolTipText("Specify listen port   (command line: -p)");
 			listenPort = new XJIntegerSpinner(1, Integer.MAX_VALUE, 5001);
+			listenPort.addChangeListener(this);
 			applicationForm.addCell(lb_listenPort);
 			lb_clientLimit = new JCheckBox("Client Limit");
 			lb_clientLimit.addActionListener(this);

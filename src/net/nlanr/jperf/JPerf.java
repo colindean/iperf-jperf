@@ -1,10 +1,15 @@
 /**
  * - 02/2008: Class created by Nicolas Richasse
+ * - 03/2008: Class updated by Nicolas Richasse
  * 
  * Changelog:
+ *-02/2008:
  * 	- class improved
  * 	- a dialog box is displayed when no executable is found instead of writing a console message
  * 	- on windows platforms, if iperf is not found into the system path, JPerf tries to search for it into the .\bin directory
+ * 
+ *-03/2008:
+ * 	- the frame is now centered on screen at startup
  * 
  * To do:
  * 	- ...
@@ -12,12 +17,16 @@
 
 package net.nlanr.jperf;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import net.nlanr.jperf.ui.JPerfUI;
@@ -118,6 +127,18 @@ public class JPerf
 			System.err.println("Impossible to get iperf version. Using '"+version+"' as default.");
 		}
 		
-		new JPerfUI(iperfCommand, version).setVisible(true);
+		JPerfUI frame = new JPerfUI(iperfCommand, version);
+		centerFrameOnScreen(frame);
+		frame.setVisible(true);
+	}
+	
+	private static GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	
+	public static void centerFrameOnScreen(JFrame frame)
+	{
+		Rectangle bounds = frame.getBounds();
+		frame.setLocation(
+				screenDevice.getDisplayMode().getWidth()/2-bounds.width/2,
+				screenDevice.getDisplayMode().getHeight()/2-bounds.height/2);
 	}
 }
