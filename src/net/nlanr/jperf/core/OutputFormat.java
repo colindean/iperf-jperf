@@ -12,7 +12,7 @@ package net.nlanr.jperf.core;
 
 public enum OutputFormat
 {
-	ADAPTIVE_BITS("a", "Adaptive Bits"), ADAPTIVE_BYTES("A", "Adaptive Bytes"), BITS("b", "Bits"), BYTES("B", "Bytes"), GBITS("g", "GBits"), GBYTES("G", "GBytes"), KBITS("k", "KBits"), KBYTES("K", "KBytes"), MBITS("m", "MBits"), MBYTES("M", "MBytes");
+	ADAPTIVE_BITS("a", "Adaptive Bits"), ADAPTIVE_BYTES("A", "Adaptive Bytes"), BITS("b", "Bits"), BYTES("B", "Bytes"), KBITS("k", "KBits"), KBYTES("K", "KBytes"), MBITS("m", "MBits"), MBYTES("M", "MBytes"), GBITS("g", "GBits"), GBYTES("G", "GBytes");
 	
 	private String shortcut;
 	private String description;

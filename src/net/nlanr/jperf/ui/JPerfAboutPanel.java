@@ -9,8 +9,8 @@
  *-03/2008:
  *  - acknowledgements panel improved
  *  
- * To do:
- * 	- ...
+ *-04/2009:
+ * 	- URL and version updated
  */
 
 package net.nlanr.jperf.ui;
@@ -32,6 +32,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+
+import net.nlanr.jperf.JPerf;
 
 public class JPerfAboutPanel extends JPanel 
 {
@@ -65,7 +67,7 @@ public class JPerfAboutPanel extends JPanel
 		info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
 
 		// Make this bold!
-		JLabel name = new JLabel("<html><b>JPERF 2.0.0</b></html>");
+		JLabel name = new JLabel("<html><b>JPERF "+JPerf.JPERF_VERSION+"</b></html>");
 		name.setHorizontalAlignment(JLabel.CENTER);
 		name.setAlignmentX(Component.CENTER_ALIGNMENT);
 		info.add(name);
@@ -79,7 +81,7 @@ public class JPerfAboutPanel extends JPanel
 		author.setAlignmentX(Component.CENTER_ALIGNMENT);
 		info.add(author);
 
-		JLabel webpage = new JLabel("<html><font color='blue'><b><u>http://iperf.sourceforge.net</u></b></font></html>");
+		JLabel webpage = new JLabel("<html><font color='blue'><b><u>"+JPerf.IPERF_URL+"</u></b></font></html>");
 		webpage.setHorizontalAlignment(JLabel.CENTER);
 		webpage.setAlignmentX(Component.CENTER_ALIGNMENT);
 		info.add(webpage);

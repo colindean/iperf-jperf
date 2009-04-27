@@ -1,3 +1,11 @@
+-------------------------------------------------------------------------------
+2009-04-17 Nicolas Richasse <nicolas.richasse@gmail.com>
+
+* URL of the project updated to http://iperf.sourceforge.net/iperf
+* UI Improvements
+* It is now possible to specify values in bits and bytes to setup the packets size (specifically with UDP)
+
+-------------------------------------------------------------------------------
 2008-03-21 Nicolas Richasse <nicolas.richasse@gmail.com> 
 
 * The project is compiled for the JRE 1.5, so that we have benefit of enumerations, generics, etc.

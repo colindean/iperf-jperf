@@ -12,7 +12,7 @@ package net.nlanr.jperf.core;
 
 public enum IperfSizeUnit
 {
-	KBITS("k", "KBits"), KBYTES("K", "KBytes"), MBITS("m", "MBits"), MBYTES("M", "MBytes");
+	BITS("b", "Bits"), BYTES("B", "Bytes"), KBITS("k", "KBits"), KBYTES("K", "KBytes"), MBITS("m", "MBits"), MBYTES("M", "MBytes");
 	
 	private String shortcut;
 	private String description;
