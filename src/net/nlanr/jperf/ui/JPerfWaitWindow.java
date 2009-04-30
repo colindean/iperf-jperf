@@ -4,15 +4,14 @@
  * Changelog:
  * 	- class created
  * 
- * To do:
- * 	- ...
+ *-05/2009:
+ *	- code improved
  */
 
 
 package net.nlanr.jperf.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -41,10 +40,11 @@ public class JPerfWaitWindow extends JDialog
 		busyLabel.setOpaque(false);
 		busyLabel.setBusy(true);
 		busyLabel.setHorizontalAlignment(JLabel.CENTER);
-		this.setLayout(new BorderLayout());
-		this.add(messageLabel, BorderLayout.NORTH);
-		this.add(busyLabel, BorderLayout.CENTER);
-		this.setSize(new Dimension(300, 80));
+		
+		super.setLayout(new BorderLayout());
+		add(messageLabel, BorderLayout.NORTH);
+		add(busyLabel, BorderLayout.CENTER);
+		pack();
 		
 		this.setLocationRelativeTo(parent);
 	}

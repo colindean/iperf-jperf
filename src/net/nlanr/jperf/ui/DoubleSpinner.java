@@ -10,16 +10,14 @@
 
 package net.nlanr.jperf.ui;
 
-import java.awt.Color;
-
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-public class XJDoubleSpinner extends JSpinner
+public class DoubleSpinner extends JSpinner
 {
 	private SpinnerNumberModel spinnerNumberModel = new SpinnerNumberModel();
 	
-	public XJDoubleSpinner(double min, double max, double step, double initialValue)
+	public DoubleSpinner(double min, double max, double step, double initialValue)
 	{
 		spinnerNumberModel.setValue(new Double(initialValue));
 		spinnerNumberModel.setStepSize(new Double(step));
@@ -27,31 +25,23 @@ public class XJDoubleSpinner extends JSpinner
 		spinnerNumberModel.setMinimum(new Double(min));
 		
 		this.setModel(spinnerNumberModel);
-		
-		setColors(Color.white, Color.black);
 	}
 	
-	public XJDoubleSpinner(double min, double max, double initialValue)
+	public DoubleSpinner(double min, double max, double initialValue)
 	{
 		this(min, max, 1.0, initialValue);
 	}
 	
-	public void setColors(Color background, Color foreground)
-	{
-		getEditor().getComponents()[0].setBackground(background);
-		getEditor().getComponents()[0].setForeground(foreground);
-	}
-	
-	public Double getValue()
+	public Object getValue()
 	{
 		Object val = super.getValue();
-		if (val instanceof Double)
+		if (val instanceof Number)
 		{
-			return (Double)val;
+			return ((Number)val).doubleValue();
 		}
 		else
 		{
-			return new Double((Integer)super.getValue());
+			return spinnerNumberModel.getMinimum();
 		}
 	}
 }

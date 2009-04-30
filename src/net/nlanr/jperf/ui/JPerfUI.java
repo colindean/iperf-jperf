@@ -20,6 +20,9 @@
  *	- main menu improved
  *	- usage of SwingUtilities.invokeLater() method into event methods
  * 	- udp packet size unit limited to KBits and KBytes
+ * 
+ *-05/2009:
+ *	- code improvements
  *  
  * Old Notes:
  *	- If I have time, I'll try to throw together a help file.  I doubt I'll
@@ -45,13 +48,11 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import net.nlanr.jperf.JPerf;
-import net.nlanr.jperf.core.IperfPacketSizeUnit;
-import net.nlanr.jperf.core.IperfSizeUnit;
 import net.nlanr.jperf.core.IperfSpeedUnit;
 import net.nlanr.jperf.core.IperfThread;
 import net.nlanr.jperf.core.Measurement;
-import net.nlanr.jperf.core.OutputFormat;
 import net.nlanr.jperf.core.TosOption;
+import net.nlanr.jperf.core.IperfUnit;
 import net.nlanr.jperf.ui.FormLayoutBuilder.Alignment;
 import net.nlanr.jperf.ui.chart.IPerfChartPanel;
 import net.nlanr.jperf.ui.chart.SeriesColorGenerator;
@@ -81,44 +82,44 @@ public class JPerfUI extends JFrame
 	private JLabel					lb_serverAddress, lb_serverPort, lb_listenPort, lb_simultaneousConnectionsNumber, lb_connectionsLimitNumber;
 	private JTextField			serverAddress;
 	private JTextField			clientLimit;
-	private XJIntegerSpinner	serverPort, listenPort;
-	private XJIntegerSpinner	simultaneousConnectionsNumber, connectionsLimitNumber;
+	private IntegerSpinner	serverPort, listenPort;
+	private IntegerSpinner	simultaneousConnectionsNumber, connectionsLimitNumber;
 	private JButton						startIperf, stopIperf, restoreDefaults;
 
 	// transport parameters
 	private JRadioButton			tcpRadioButton, udpRadioButton;
 	private JCheckBox					lb_tcpBufferLength;
-	private XJIntegerSpinner	tcpBufferLength;
+	private DoubleSpinner	tcpBufferLength;
 	private JComboBox					tcpBufferSizeUnit;
 	private JCheckBox					lb_tcpWindowSize;
-	private XJIntegerSpinner	tcpWindowSize;
+	private DoubleSpinner	tcpWindowSize;
 	private JComboBox					tcpWindowSizeUnit;
 	private JCheckBox					lb_mss;
-	private XJIntegerSpinner	mss;
+	private DoubleSpinner	mss;
 	private JComboBox					mssUnit;
 	private JCheckBox					lb_udpBufferSize;
-	private XJIntegerSpinner	udpBufferSize;
+	private DoubleSpinner	udpBufferSize;
 	private JComboBox					udpBufferSizeUnit;
 	private JCheckBox					lb_udpPacketSize;
-	private XJIntegerSpinner	udpPacketSize;
+	private DoubleSpinner	udpPacketSize;
 	private JComboBox					udpPacketSizeUnit;
 	private JLabel						lb_udpBandwidth;
-	private XJIntegerSpinner	udpBandwidth;
+	private DoubleSpinner	udpBandwidth;
 	private JComboBox					udpBandwidthUnit;
 	private JCheckBox					tcpNoDelay;
 
 	// ip parameters
 	private JLabel						lb_bindHost, lb_TTL;
 	private JTextField				bindhost;
-	private XJIntegerSpinner	TTL;
+	private IntegerSpinner	TTL;
 	private JComboBox					tos;
 
 	// other parameters
 	private JCheckBox					printMSS;
 	private JTextField				representativeFile;
-	private XJIntegerSpinner	transmit;
+	private IntegerSpinner	transmit;
 	private JComboBox					formatList;
-	private XJIntegerSpinner	interval;
+	private IntegerSpinner	interval;
 	private ButtonGroup				iperfModeButtonGroup;
 	private ButtonGroup				protocolButtonGroup;
 	private JRadioButton			transmitBytesRadioButton, transmitSecondsRadioButton;
@@ -127,7 +128,7 @@ public class JPerfUI extends JFrame
 	private JCheckBox					alwaysClearOutput;
 	private JButton						clearOutputButton, saveOutputButton;
 	private JCheckBox					compatibilityMode;
-	private XJIntegerSpinner	testPort;
+	private IntegerSpinner	testPort;
 	private JCheckBox					dualMode, tradeMode;
 	private JButton						browse;
 	private float							iperfVersion;
@@ -199,16 +200,16 @@ public class JPerfUI extends JFrame
 		serverPort.setValue(5001);
 		testPort.setValue(5001);
 		tcpBufferLength.setValue(2);
-		tcpBufferSizeUnit.setSelectedItem(IperfSizeUnit.MBYTES);
+		tcpBufferSizeUnit.setSelectedItem(IperfUnit.MBYTES);
 		tcpWindowSize.setValue(56);
-		tcpWindowSizeUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+		tcpWindowSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 		mss.setValue(1);
-		mssUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+		mssUnit.setSelectedItem(IperfUnit.KBYTES);
 
 		udpBufferSize.setValue(41);
-		udpBufferSizeUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+		udpBufferSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 		udpPacketSize.setValue(1500);
-		udpPacketSizeUnit.setSelectedItem(IperfPacketSizeUnit.BYTES);
+		udpPacketSizeUnit.setSelectedItem(IperfUnit.BYTES);
 
 		// desactivate compatibility mode
 		compatibilityMode.setSelected(true);
@@ -320,7 +321,7 @@ public class JPerfUI extends JFrame
 			lb_serverPort = new JLabel("Port");
 			lb_serverPort.setOpaque(false);
 			lb_serverPort.setToolTipText("Specify port   (command line: -p)");
-			serverPort = new XJIntegerSpinner(1, Integer.MAX_VALUE, 5001);
+			serverPort = new IntegerSpinner(1, Integer.MAX_VALUE, 5001);
 			serverPort.addChangeListener(this);
 			applicationForm.addCell(lb_serverAddress);
 			applicationForm.addCompositeCell(serverAddress, lb_serverPort, serverPort);
@@ -330,7 +331,7 @@ public class JPerfUI extends JFrame
 			lb_simultaneousConnectionsNumber = new JLabel("Parallel Streams");
 			lb_simultaneousConnectionsNumber.setOpaque(false);
 			lb_simultaneousConnectionsNumber.setToolTipText("The number of simultaneous connections to make to the server. Default is 1.   (command line: -P)");
-			simultaneousConnectionsNumber = new XJIntegerSpinner(1, Integer.MAX_VALUE, 1);
+			simultaneousConnectionsNumber = new IntegerSpinner(1, Integer.MAX_VALUE, 1);
 			simultaneousConnectionsNumber.addChangeListener(this);
 
 			applicationForm.addCell(lb_simultaneousConnectionsNumber);
@@ -348,7 +349,7 @@ public class JPerfUI extends JFrame
 			lb_listenPort = new JLabel("Listen Port");
 			lb_listenPort.setOpaque(false);
 			lb_listenPort.setToolTipText("Specify listen port   (command line: -p)");
-			listenPort = new XJIntegerSpinner(1, Integer.MAX_VALUE, 5001);
+			listenPort = new IntegerSpinner(1, Integer.MAX_VALUE, 5001);
 			listenPort.addChangeListener(this);
 			applicationForm.addCell(lb_listenPort);
 			lb_clientLimit = new JCheckBox("Client Limit");
@@ -365,7 +366,7 @@ public class JPerfUI extends JFrame
 			lb_connectionsLimitNumber.setOpaque(false);
 			lb_connectionsLimitNumber.setToolTipText("The number of connections to handle by the server before closing. Default is 0 (handle forever)   (command line: -P)");
 			applicationForm.addCell(lb_connectionsLimitNumber);
-			connectionsLimitNumber = new XJIntegerSpinner(0, Integer.MAX_VALUE, 0);
+			connectionsLimitNumber = new IntegerSpinner(0, Integer.MAX_VALUE, 0);
 			connectionsLimitNumber.addChangeListener(this);
 			applicationForm.addCell(connectionsLimitNumber);
 
@@ -404,7 +405,7 @@ public class JPerfUI extends JFrame
 			// num buffers to transmit
 			lb_transmit = new JLabel("Transmit");
 			lb_transmit.setToolTipText("Time to transmit, or number of buffers to transmit. Default is 10secs   (command line: -t, -n)");
-			transmit = new XJIntegerSpinner(0, Integer.MAX_VALUE, 10);
+			transmit = new IntegerSpinner(0, Integer.MAX_VALUE, 10);
 			transmit.addChangeListener(this);
 			applicationForm.addCell(lb_transmit);
 			applicationForm.addCell(transmit);
@@ -428,9 +429,9 @@ public class JPerfUI extends JFrame
 			// output format
 			lb_outputFormat = new JLabel("Output Format");
 			lb_outputFormat.setToolTipText("Format to print bandwidth numbers in. Adaptive formats choose between kilo- and mega-   (command line: -f)");
-			formatList = new JComboBox(OutputFormat.values());
+			formatList = new JComboBox(IperfUnit.getAllowedOutputFormatUnits());
 			formatList.addActionListener(this);
-			formatList.setSelectedItem(OutputFormat.KBITS);
+			formatList.setSelectedItem(IperfUnit.KBITS);
 			applicationForm.addCell(lb_outputFormat);
 			applicationForm.addCell(formatList);
 
@@ -439,7 +440,7 @@ public class JPerfUI extends JFrame
 			// interval of reports
 			lb_reportInterval = new JLabel("Report Interval");
 			lb_reportInterval.setToolTipText("Sets the interval time (secs) between periodic bandwidth, jitter, and loss reports   (command line: -i)");
-			interval = new XJIntegerSpinner(1, Integer.MAX_VALUE, 1);
+			interval = new IntegerSpinner(1, Integer.MAX_VALUE, 1);
 			interval.addChangeListener(this);
 			applicationForm.addCell(lb_reportInterval);
 			applicationForm.addCompositeCell(interval, new JLabel("seconds"));
@@ -459,7 +460,7 @@ public class JPerfUI extends JFrame
 			applicationForm.newLine();
 			lb_testPort = new JLabel("test port");
 			lb_testPort.setToolTipText("This specifies the port that the server will connect back to the client on   (command line: -L)");
-			testPort = new XJIntegerSpinner(1, Integer.MAX_VALUE, 5001);
+			testPort = new IntegerSpinner(1, Integer.MAX_VALUE, 5001);
 			testPort.addChangeListener(this);
 			applicationForm.addEmptyCell();
 			applicationForm.addCompositeCell(lb_testPort, testPort);
@@ -576,7 +577,7 @@ public class JPerfUI extends JFrame
 	{
 		if (tcpPanel == null)
 		{
-			FormLayoutBuilder tcpForm = new FormLayoutBuilder(3);
+			FormLayoutBuilder tcpForm = new FormLayoutBuilder(3, new FormLayoutColumn(Alignment.fill));
 			tcpForm.addCell(tcpRadioButton);
 			tcpForm.newLine();
 			// buffer length
@@ -584,12 +585,12 @@ public class JPerfUI extends JFrame
 			lb_tcpBufferLength.setToolTipText("Read/Write buffer length. Use 'K' or 'M' for kilo/mega bytes. (i.e 8K)   (command line: -l)");
 			lb_tcpBufferLength.addActionListener(this);
 			tcpForm.addCell(lb_tcpBufferLength);
-			tcpBufferLength = new XJIntegerSpinner(1, 9999, 8);
+			tcpBufferLength = new DoubleSpinner(1, 9999, 8);
 			tcpBufferLength.addChangeListener(this);
 			tcpForm.addCell(tcpBufferLength);
-			tcpBufferSizeUnit = new JComboBox(IperfSizeUnit.values());
+			tcpBufferSizeUnit = new JComboBox(IperfUnit.getAllowedBufferSizeUnits());
 			tcpBufferSizeUnit.addActionListener(this);
-			tcpBufferSizeUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+			tcpBufferSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 			tcpForm.addCell(tcpBufferSizeUnit);
 
 			tcpForm.newLine();
@@ -599,12 +600,12 @@ public class JPerfUI extends JFrame
 			lb_tcpWindowSize.setToolTipText("Set TCP window size. Use 'K' or 'M' for kilo/mega bytes. (i.e 8K)   (command line: -w)");
 			lb_tcpWindowSize.addActionListener(this);
 			tcpForm.addCell(lb_tcpWindowSize);
-			tcpWindowSize = new XJIntegerSpinner(1, 9999, 8);
+			tcpWindowSize = new DoubleSpinner(1, 9999, 8);
 			tcpWindowSize.addChangeListener(this);
 			tcpForm.addCell(tcpWindowSize);
-			tcpWindowSizeUnit = new JComboBox(IperfSizeUnit.values());
+			tcpWindowSizeUnit = new JComboBox(IperfUnit.getAllowedTCPWindowSizeUnits());
 			tcpWindowSizeUnit.addActionListener(this);
-			tcpWindowSizeUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+			tcpWindowSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 			tcpForm.addCell(tcpWindowSizeUnit);
 
 			tcpForm.newLine();
@@ -614,12 +615,12 @@ public class JPerfUI extends JFrame
 			lb_mss.setToolTipText("Attempt to set max segment size. Use 'K' or 'M' for kilo/mega bytes. (i.e 8K)   (command line: -M)");
 			lb_mss.addActionListener(this);
 			tcpForm.addCell(lb_mss);
-			mss = new XJIntegerSpinner(1, 9999, 8);
+			mss = new DoubleSpinner(1, 9999, 8);
 			mss.addChangeListener(this);
 			tcpForm.addCell(mss);
-			mssUnit = new JComboBox(IperfSizeUnit.values());
+			mssUnit = new JComboBox(IperfUnit.getAllowedTCPMaxSegmentSizeUnits());
 			mssUnit.addActionListener(this);
-			mssUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+			mssUnit.setSelectedItem(IperfUnit.KBYTES);
 			tcpForm.addCell(mssUnit);
 
 			tcpForm.newLine();
@@ -672,7 +673,7 @@ public class JPerfUI extends JFrame
 			lb_udpBandwidth = new JLabel("UDP Bandwidth");
 			lb_udpBandwidth.setToolTipText("Set bandwidth to send in bits/sec. Use 'K' or 'M' for kilo/mega bits. (i.e 8K)   (command line: -b)");
 			udpForm.addCell(lb_udpBandwidth);
-			udpBandwidth = new XJIntegerSpinner(1, 9999, 1);
+			udpBandwidth = new DoubleSpinner(1, 9999, 1);
 			udpBandwidth.addChangeListener(this);
 			udpForm.addCell(udpBandwidth);
 			udpBandwidthUnit = new JComboBox(IperfSpeedUnit.values());
@@ -687,12 +688,12 @@ public class JPerfUI extends JFrame
 			lb_udpBufferSize.setToolTipText("Set UDP buffer size. Use 'K' or 'M' for kilo/mega bytes. (i.e 8K)   (command line: -w)");
 			lb_udpBufferSize.addActionListener(this);
 			udpForm.addCell(lb_udpBufferSize);
-			udpBufferSize = new XJIntegerSpinner(1, 9999, 8);
+			udpBufferSize = new DoubleSpinner(1, 9999, 8);
 			udpBufferSize.addChangeListener(this);
 			udpForm.addCell(udpBufferSize);
-			udpBufferSizeUnit = new JComboBox(IperfSizeUnit.values());
+			udpBufferSizeUnit = new JComboBox(IperfUnit.getAllowedBufferSizeUnits());
 			udpBufferSizeUnit.addActionListener(this);
-			udpBufferSizeUnit.setSelectedItem(IperfSizeUnit.KBYTES);
+			udpBufferSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 			udpForm.addCell(udpBufferSizeUnit);
 
 			udpForm.newLine();
@@ -702,12 +703,12 @@ public class JPerfUI extends JFrame
 			lb_udpPacketSize.setToolTipText("Set UDP datagram buffer size. Use 'K' or 'M' for kilo/mega bytes. (i.e 1470)   (command line: -l)");
 			lb_udpPacketSize.addActionListener(this);
 			udpForm.addCell(lb_udpPacketSize);
-			udpPacketSize = new XJIntegerSpinner(1, 9999, 1500);
+			udpPacketSize = new DoubleSpinner(1, 9999, 1500);
 			udpPacketSize.addChangeListener(this);
 			udpForm.addCell(udpPacketSize);
-			udpPacketSizeUnit = new JComboBox(IperfPacketSizeUnit.values());
+			udpPacketSizeUnit = new JComboBox(IperfUnit.getAllowedUDPPacketSizeUnits());
 			udpPacketSizeUnit.addActionListener(this);
-			udpPacketSizeUnit.setSelectedItem(IperfPacketSizeUnit.KBYTES);
+			udpPacketSizeUnit.setSelectedItem(IperfUnit.KBYTES);
 			udpForm.addCell(udpPacketSizeUnit);
 
 			udpForm.newLine();
@@ -729,7 +730,7 @@ public class JPerfUI extends JFrame
 			lb_TTL = new JLabel("TTL");
 			lb_TTL.setToolTipText("Set time to live (number of hops). Default is 1.   (command line: -T)");
 			ipForm.addCell(lb_TTL);
-			TTL = new XJIntegerSpinner(0, Integer.MAX_VALUE, 1);
+			TTL = new IntegerSpinner(0, Integer.MAX_VALUE, 1);
 			TTL.addChangeListener(this);
 			ipForm.addCell(TTL);
 
@@ -948,7 +949,7 @@ public class JPerfUI extends JFrame
 			saveOutputButton.setActionCommand("Save");
 			saveOutputButton.addActionListener(this);
 			saveOutputButton.setToolTipText("Save output to a file");
-			alwaysClearOutput = new JCheckBox("Clear Output for new Iperf Run");
+			alwaysClearOutput = new JCheckBox("Clear Output on each Iperf Run");
 			alwaysClearOutput.setToolTipText("Always clear Iperf output between runs.");
 			alwaysClearOutput.setSelected(false);
 			outputButtonsPanel.add(saveOutputButton);
@@ -1076,8 +1077,8 @@ public class JPerfUI extends JFrame
 						}
 		
 						// can not have adaptive bits for graph
-						OutputFormat of = (OutputFormat) formatList.getSelectedItem();
-						if (of == OutputFormat.ADAPTIVE_BITS || of == OutputFormat.ADAPTIVE_BYTES)
+						IperfUnit of = (IperfUnit) formatList.getSelectedItem();
+						if (of == IperfUnit.ADAPTIVE_BITS || of == IperfUnit.ADAPTIVE_BYTES)
 						{
 							JOptionPane.showMessageDialog(JPerfUI.this, "The bandwidth graph will not be created because an adaptive format is selected", "Information", JOptionPane.INFORMATION_MESSAGE);
 						}
@@ -1223,11 +1224,11 @@ public class JPerfUI extends JFrame
 		}
 		if (lb_tcpWindowSize.isSelected() && tcpWindowSize.isEnabled())
 		{
-			options += " -w " + tcpWindowSize.getValue() + ((IperfSizeUnit) tcpWindowSizeUnit.getSelectedItem()).getShortcut();
+			options += " -w " + tcpWindowSize.getValue() + ((IperfUnit) tcpWindowSizeUnit.getSelectedItem()).getShortcut();
 		}
 		else if (lb_udpBufferSize.isSelected() && udpBufferSize.isEnabled())
 		{
-			options += " -w " + udpBufferSize.getValue() + ((IperfSizeUnit) udpBufferSizeUnit.getSelectedItem()).getShortcut();
+			options += " -w " + udpBufferSize.getValue() + ((IperfUnit) udpBufferSizeUnit.getSelectedItem()).getShortcut();
 		}
 		if (bindhost.getText().length() > 0)
 		{
@@ -1235,7 +1236,7 @@ public class JPerfUI extends JFrame
 		}
 		if (lb_mss.isSelected() && mss.isEnabled())
 		{
-			options += " -M " + mss.getValue() + ((IperfSizeUnit) mssUnit.getSelectedItem()).getShortcut();
+			options += " -M " + mss.getValue() + ((IperfUnit) mssUnit.getSelectedItem()).getShortcut();
 		}
 		if (tcpNoDelay.isSelected() && tcpNoDelay.isEnabled())
 		{
@@ -1247,11 +1248,11 @@ public class JPerfUI extends JFrame
 		}
 		if (lb_tcpBufferLength.isSelected() && tcpBufferLength.isEnabled())
 		{
-			options += " -l " + tcpBufferLength.getValue() + ((IperfSizeUnit) tcpBufferSizeUnit.getSelectedItem()).getShortcut();
+			options += " -l " + tcpBufferLength.getValue() + ((IperfUnit) tcpBufferSizeUnit.getSelectedItem()).getShortcut();
 		}
 		else if (lb_udpPacketSize.isSelected() && udpPacketSize.isEnabled())
 		{
-			options += " -l " + udpPacketSize.getValue() + ((IperfPacketSizeUnit) udpPacketSizeUnit.getSelectedItem()).getShortcut();
+			options += " -l " + udpPacketSize.getValue() + ((IperfUnit) udpPacketSizeUnit.getSelectedItem()).getShortcut();
 		}
 		if (compatibilityMode.isSelected() && compatibilityMode.isEnabled())
 		{
@@ -1259,7 +1260,7 @@ public class JPerfUI extends JFrame
 		}
 
 		// do format
-		options += " -f " + ((OutputFormat) formatList.getSelectedItem()).getShortcut();
+		options += " -f " + ((IperfUnit) formatList.getSelectedItem()).getShortcut();
 
 		if (udpBandwidthUnit.isEnabled() && udpBandwidth.isEnabled())
 		{

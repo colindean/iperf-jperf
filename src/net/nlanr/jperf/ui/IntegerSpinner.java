@@ -10,17 +10,16 @@
 
 package net.nlanr.jperf.ui;
 
-import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-public class XJIntegerSpinner extends JSpinner
+public class IntegerSpinner extends JSpinner
 {
 	private SpinnerNumberModel spinnerNumberModel = new SpinnerNumberModel();
 	
-	public XJIntegerSpinner(int min, int max, int step, int initialValue)
+	public IntegerSpinner(int min, int max, int step, int initialValue)
 	{
 		spinnerNumberModel.setValue(new Integer(initialValue));
 		spinnerNumberModel.setStepSize(new Integer(step));
@@ -29,22 +28,15 @@ public class XJIntegerSpinner extends JSpinner
 		
 		this.setModel(spinnerNumberModel);
 		this.setPreferredSize(new Dimension(120, 20));
-		setColors(Color.white, Color.black);
 	}
 	
-	public XJIntegerSpinner(int min, int max, int initialValue)
+	public IntegerSpinner(int min, int max, int initialValue)
 	{
 		this(min, max, 1, initialValue);
 	}
 	
-	public void setColors(Color background, Color foreground)
-	{
-		getEditor().getComponents()[0].setBackground(background);
-		getEditor().getComponents()[0].setForeground(foreground);
-	}
-	
 	public Integer getValue()
 	{
-		return (Integer)super.getValue();
+		return ((Number)super.getValue()).intValue();
 	}
 }

@@ -22,6 +22,8 @@ import net.nlanr.jperf.ui.JPerfWaitWindow;
 import java.util.Vector;
 import java.util.regex.*;
 
+import javax.swing.SwingUtilities;
+
 public class IperfThread extends Thread
 {
 	private String										command;
@@ -50,7 +52,7 @@ public class IperfThread extends Thread
 			frame.setStartedStatus();
 
 			process = Runtime.getRuntime().exec(command);
-
+			
 			// read in the output from Iperf
 			input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			errors = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -80,102 +82,122 @@ public class IperfThread extends Thread
 			quit();
 		}
 	}
-
+	
+	private Object waitWindowMutex = new Object();
+	private JPerfWaitWindow waitWindow;
+	
 	public synchronized void quit()
 	{
-		if (process != null)
+		SwingUtilities.invokeLater(new Runnable()
 		{
-			JPerfWaitWindow waitWindow = new JPerfWaitWindow(frame);
-			frame.setEnabled(false);
-			waitWindow.setVisible(true);
-			waitWindow.repaint();
-			try
+			public void run()
 			{
-				Thread.sleep(100);
+				if (process != null)
+				{
+					synchronized(waitWindowMutex)
+					{
+						if (waitWindow != null)
+						{
+							return;
+						}
+						waitWindow = new JPerfWaitWindow(frame);
+						frame.setEnabled(false);
+						waitWindow.setVisible(true);
+					}
+					Thread t = new Thread()
+					{
+						public void run()
+						{
+							process.destroy();
+							
+							if (!isServerMode)
+							{
+								
+								try
+								{
+									process.getInputStream().close();
+								}
+								catch (Exception e)
+								{
+									// nothing
+								}
+				
+								try
+								{
+									process.getOutputStream().close();
+								}
+								catch (Exception e)
+								{
+									// nothing
+								}
+				
+								try
+								{
+									process.getErrorStream().close();
+								}
+								catch (Exception e)
+								{
+									// nothing
+								}
+								
+								if (input != null)
+								{
+									try
+									{
+										input.close();
+									}
+									catch (Exception e)
+									{
+										// nothing
+									}
+									finally
+									{
+										input = null;
+									}
+								}
+				
+								if (errors != null)
+								{
+									try
+									{
+										errors.close();
+									}
+									catch (Exception e)
+									{
+										// nothing
+									}
+									finally
+									{
+										errors = null;
+									}
+								}
+							}
+							
+							try
+							{
+								process.waitFor();
+							}
+							catch (Exception ie)
+							{
+								// nothing
+							}
+				
+							process = null;
+							
+							synchronized(waitWindowMutex)
+							{
+								frame.setStoppedStatus();
+								waitWindow.setVisible(false);
+								frame.setEnabled(true);
+								waitWindow = null;
+							}
+						}
+					};
+					t.setDaemon(true);
+					t.start();
+				}
 			}
-			catch (InterruptedException ie)
-			{
-			}
-
-			if (!isServerMode)
-			{
-				if (input != null)
-				{
-					try
-					{
-						input.close();
-					}
-					catch (Exception e)
-					{
-						// nothing
-					}
-					finally
-					{
-						input = null;
-					}
-				}
-
-				if (errors != null)
-				{
-					try
-					{
-						errors.close();
-					}
-					catch (Exception e)
-					{
-						// nothing
-					}
-					finally
-					{
-						errors = null;
-					}
-				}
-
-				try
-				{
-					process.getInputStream().close();
-				}
-				catch (Exception e)
-				{
-					// nothing
-				}
-
-				try
-				{
-					process.getOutputStream().close();
-				}
-				catch (Exception e)
-				{
-					// nothing
-				}
-
-				try
-				{
-					process.getErrorStream().close();
-				}
-				catch (Exception e)
-				{
-					// nothing
-				}
-			}
-
-			process.destroy();
-
-			try
-			{
-				process.waitFor();
-			}
-			catch (Exception ie)
-			{
-				// nothing
-			}
-
-			process = null;
-
-			frame.setStoppedStatus();
-			waitWindow.setVisible(false);
-			frame.setEnabled(true);
-		}
+		});
 	}
 
 	public void parseLine(String line)

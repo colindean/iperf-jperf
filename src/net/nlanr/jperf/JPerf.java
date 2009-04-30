@@ -13,6 +13,9 @@
  * 
  *-04/2009:
  * 	- URL and version updated
+ * 
+ *-05/2009:
+ *	- System Look'n feel used under windows
  */
 
 package net.nlanr.jperf;
@@ -24,11 +27,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import net.nlanr.jperf.ui.JPerfUI;
 
@@ -135,6 +140,25 @@ public class JPerf
 					System.err.println("Impossible to get iperf version. Using '"+version+"' as default.");
 				}
 				
+				// set the locale to EN_US
+				Locale.setDefault(Locale.ENGLISH);
+				
+				// if the OS is Windows, then we set the sytem Look'n Feel
+				Properties sysprops = System.getProperties();
+				String osName = ((String)sysprops.get("os.name")).toLowerCase();
+				if (osName.matches(".*win.*") || osName.matches(".*dos.*") || osName.matches(".*microsoft.*"))
+				{
+					try 
+					{
+						UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					}
+					catch (Exception e)
+					{
+						// nothing
+					}
+				}
+				
+				// we start the user interface
 				JPerfUI frame = new JPerfUI(iperfCommand, version);
 				centerFrameOnScreen(frame);
 				frame.setVisible(true);
