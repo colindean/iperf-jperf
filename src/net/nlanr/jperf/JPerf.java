@@ -39,7 +39,7 @@ import net.nlanr.jperf.ui.JPerfUI;
 
 public class JPerf
 {
-	public static final String JPERF_VERSION = "2.0.1";
+	public static final String JPERF_VERSION = "2.0.2";
 	public static final String IPERF_URL = "http://iperf.sourceforge.net";
 	
 	public static void main(String[] args)
