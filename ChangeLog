@@ -1,4 +1,11 @@
 -------------------------------------------------------------------------------
+2009-05 Nicolas Richasse <nicolas.richasse@gmail.com>
+
+* WaitWindow behavior and UI improved (the one displayed when stopping iperf)
+* System Look'n feel used under windows
+* Code improvements
+
+-------------------------------------------------------------------------------
 2009-04-17 Nicolas Richasse <nicolas.richasse@gmail.com>
 
 * URL of the project updated to http://iperf.sourceforge.net/iperf
