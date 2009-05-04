@@ -48,6 +48,7 @@ import org.jdesktop.swingx.JXTaskPane;
 import org.jdesktop.swingx.JXTaskPaneContainer;
 
 import net.nlanr.jperf.JPerf;
+import net.nlanr.jperf.core.IPerfProperties;
 import net.nlanr.jperf.core.IperfSpeedUnit;
 import net.nlanr.jperf.core.IperfThread;
 import net.nlanr.jperf.core.Measurement;
@@ -58,6 +59,8 @@ import net.nlanr.jperf.ui.chart.IPerfChartPanel;
 import net.nlanr.jperf.ui.chart.SeriesColorGenerator;
 
 import java.io.*;
+
+import static net.nlanr.jperf.core.IPerfProperties.*;
 
 public class JPerfUI extends JFrame
 	implements ActionListener, KeyListener, ChangeListener, WindowListener
@@ -143,7 +146,9 @@ public class JPerfUI extends JFrame
 	private String						version;
 
 	private String						iperfCommand;
-
+	
+	private IPerfProperties defaultConfiguration = new IPerfProperties(true);
+	
 	public JPerfUI(String iperfCommand, String version)
 	{
 		super("JPerf "+JPerf.JPERF_VERSION+" - Network performance measurement graphical tool");
@@ -167,7 +172,7 @@ public class JPerfUI extends JFrame
 		init();
 
 		// apply default values
-		applyDefaultValues();
+		applyConfiguration(defaultConfiguration);
 
 		// start the stats panel
 		chartPanel.start();
@@ -187,42 +192,143 @@ public class JPerfUI extends JFrame
 	private JPanel	tcpPanel					= null;
 	private JPanel	udpPanel					= null;
 	private JPanel	ipPanel						= null;
-
-	private void applyDefaultValues()
+	
+	private void applyConfiguration(IPerfProperties p)
 	{
-		setServerModeSelected(false);
-		setClientModeSelected(true);
-		clientModeRadioButton.doClick();
-		setUDPOptionsEnabled(false);
-		setTCPOptionsEnabled(true);
-		tcpRadioButton.doClick();
-
-		serverPort.setValue(5001);
-		testPort.setValue(5001);
-		tcpBufferLength.setValue(2);
-		tcpBufferSizeUnit.setSelectedItem(IperfUnit.MBYTES);
-		tcpWindowSize.setValue(56);
-		tcpWindowSizeUnit.setSelectedItem(IperfUnit.KBYTES);
-		mss.setValue(1);
-		mssUnit.setSelectedItem(IperfUnit.KBYTES);
-
-		udpBufferSize.setValue(41);
-		udpBufferSizeUnit.setSelectedItem(IperfUnit.KBYTES);
-		udpPacketSize.setValue(1500);
-		udpPacketSizeUnit.setSelectedItem(IperfUnit.BYTES);
-
-		// desactivate compatibility mode
-		compatibilityMode.setSelected(true);
-		compatibilityMode.doClick();
-
-		// desactivate IPv6
-		ipv6.setSelected(true);
+		// quickstart panel
+		boolean isServerModeSelected = p.getString(KEY_MODE, DEFAULT_MODE).toLowerCase().trim().equals("server");
+		setServerModeSelected(isServerModeSelected);
+		setClientModeSelected(!isServerModeSelected);
+		if (isServerModeSelected)
+		{
+			serverModeRadioButton.doClick();
+		}
+		else
+		{
+			clientModeRadioButton.doClick();
+		}
+		serverAddress.setText(p.getString(KEY_SERVER_ADDRESS, DEFAULT_SERVER_ADDRESS));
+		serverPort.setValue(p.getInteger(KEY_SERVER_PORT, DEFAULT_SERVER_PORT));
+		lb_clientLimit.setSelected(p.getBoolean(KEY_CLIENT_LIMIT_ENABLED, DEFAULT_CLIENT_LIMIT_ENABLED));
+		_lb_clientLimit_actionPerformed();
+		clientLimit.setText(p.getString(KEY_CLIENT_LIMIT, DEFAULT_CLIENT_LIMIT));
+		listenPort.setValue(p.getInteger(KEY_LISTEN_PORT, DEFAULT_LISTEN_PORT));
+		simultaneousConnectionsNumber.setValue(p.getInteger(KEY_PARALLEL_STREAMS, DEFAULT_PARALLEL_STREAMS));
+		connectionsLimitNumber.setValue(p.getInteger(KEY_NUM_CONNECTIONS, DEFAULT_NUM_CONNECTIONS));
+		
+		// application layer panel
+		compatibilityMode.setSelected(p.getBoolean(KEY_COMPATIBILITY_MODE_ENABLED, DEFAULT_COMPATIBILITY_MODE_ENABLED));
+		_compatibilityMode_actionPerformed();
+		transmit.setValue(p.getInteger(KEY_TRANSMIT, DEFAULT_TRANSMIT));
+		boolean isTransmitSecondsSelected = p.getString(KEY_TRANSMIT_UNIT, DEFAULT_TRANSMIT_UNIT).trim().toLowerCase().equals("seconds");
+		transmitSecondsRadioButton.setSelected(isTransmitSecondsSelected);
+		transmitBytesRadioButton.setSelected(!isTransmitSecondsSelected);
+		if (isTransmitSecondsSelected)
+		{
+			_transmitSecondsRadioButton_actionPerformed();
+		}
+		else
+		{
+			_transmitBytesRadioButton_actionPerformed();
+		}
+		formatList.setSelectedItem(p.getUnit(KEY_OUTPUT_FORMAT, DEFAULT_OUTPUT_FORMAT));
+		interval.setValue(p.getInteger(KEY_REPORT_INTERVAL, DEFAULT_REPORT_INTERVAL));
+		dualMode.setSelected(p.getBoolean(KEY_TEST_MODE_DUAL_ENABLED, DEFAULT_TEST_MODE_DUAL_ENABLED));
+		_dualMode_actionPerformed();
+		tradeMode.setSelected(p.getBoolean(KEY_TEST_MODE_DUAL_ENABLED, DEFAULT_TEST_MODE_TRADE_ENABLED));
+		_tradeMode_actionPerformed();
+		testPort.setValue(p.getInteger(KEY_TEST_MODE_PORT, DEFAULT_TEST_MODE_PORT));
+		printMSS.setSelected(p.getBoolean(KEY_PRINT_MSS_ENABLED, DEFAULT_PRINT_MSS_ENABLED));
+		_printMSS_actionPerformed();
+		
+		// transport layer panel
+		boolean isUDPModeSelected = p.getString(KEY_TRANSPORT_PROTOCOL, DEFAULT_TRANSPORT_PROTOCOL).equals("udp");
+		setUDPOptionsEnabled(isUDPModeSelected);
+		setTCPOptionsEnabled(!isUDPModeSelected);
+		if (isUDPModeSelected)
+		{
+			udpRadioButton.doClick();
+		}
+		else
+		{
+			tcpRadioButton.doClick();
+		}
+		
+		lb_tcpBufferLength.setSelected(p.getBoolean(KEY_TCP_BUFFER_LENGTH_ENABLED, DEFAULT_TCP_BUFFER_LENGTH_ENABLED));
+		tcpBufferLength.setValue(p.getDouble(KEY_TCP_BUFFER_LENGTH, DEFAULT_TCP_BUFFER_LENGTH));
+		tcpBufferSizeUnit.setSelectedItem(p.getUnit(KEY_TCP_BUFFER_LENGTH, DEFAULT_TCP_BUFFER_LENGTH_UNIT));
+		_lb_tcpBufferLength_actionPerformed();
+		
+		lb_tcpWindowSize.setSelected(p.getBoolean(KEY_TCP_WINDOW_SIZE_ENABLED, DEFAULT_TCP_WINDOW_SIZE_ENABLED));
+		tcpWindowSize.setValue(p.getDouble(KEY_TCP_WINDOW_SIZE, DEFAULT_TCP_WINDOW_SIZE));
+		tcpWindowSizeUnit.setSelectedItem(p.getUnit(KEY_TCP_WINDOW_SIZE_UNIT, DEFAULT_TCP_WINDOW_SIZE_UNIT));
+		_lb_tcpWindowSize_actionPerformed();
+		
+		lb_mss.setSelected(p.getBoolean(KEY_TCP_MSS_ENABLED, DEFAULT_TCP_MSS_ENABLED));
+		mss.setValue(p.getDouble(KEY_TCP_MSS, DEFAULT_TCP_MSS));
+		mssUnit.setSelectedItem(p.getUnit(KEY_TCP_MSS_UNIT, DEFAULT_TCP_MSS_UNIT));
+		_lb_mss_actionPerformed();
+		
+		tcpNoDelay.setSelected(p.getBoolean(KEY_TCP_NO_DELAY_ENABLED, DEFAULT_TCP_NO_DELAY_ENABLED));
+		_tcpNoDelay_actionPerformed();
+		
+		udpBandwidth.setValue(p.getDouble(KEY_UDP_BANDWIDTH, DEFAULT_UDP_BANDWIDTH));
+		udpBandwidthUnit.setSelectedItem(p.getSpeedUnit(KEY_UDP_BANDWIDTH_UNIT, DEFAULT_UDP_BANDWIDTH_UNIT));
+		
+		lb_udpBufferSize.setSelected(p.getBoolean(KEY_UDP_BUFFER_SIZE_ENABLED, DEFAULT_UDP_BUFFER_SIZE_ENABLED));
+		udpBufferSize.setValue(p.getDouble(KEY_UDP_BUFFER_SIZE, DEFAULT_UDP_BUFFER_SIZE));
+		udpBufferSizeUnit.setSelectedItem(p.getUnit(KEY_UDP_BUFFER_SIZE_UNIT, DEFAULT_UDP_BUFFER_SIZE_UNIT));
+		_lb_udpBufferSize_actionPerformed();
+		
+		lb_udpPacketSize.setSelected(p.getBoolean(KEY_UDP_PACKET_SIZE_ENABLED, DEFAULT_UDP_PACKET_SIZE_ENABLED));
+		udpPacketSize.setValue(p.getDouble(KEY_UDP_PACKET_SIZE, DEFAULT_UDP_PACKET_SIZE));
+		udpPacketSizeUnit.setSelectedItem(p.getUnit(KEY_UDP_PACKET_SIZE_UNIT, DEFAULT_UDP_PACKET_SIZE_UNIT));
+		_lb_udpPacketSize_actionPerformed();
+		
+		// IP layer panel
+		TTL.setValue(p.getInteger(KEY_TTL, DEFAULT_TTL));
+		tos.setSelectedItem(p.getTosOption(KEY_TOS, DEFAULT_TOS));
+		bindhost.setText(p.getString(KEY_BIND_TO_HOST, DEFAULT_BIND_TO_HOST));
+		
+		ipv6.setSelected(!p.getBoolean(KEY_IPV6_ENABLED, DEFAULT_IPV6_ENABLED));
 		ipv6.doClick();
-
-		// deselect dualmode and trademode
-		dualMode.setSelected(false);
-		tradeMode.setSelected(false);
 	}
+	
+//	private void applyDefaultValues()
+//	{
+//		setServerModeSelected(false);
+//		setClientModeSelected(true);
+//		clientModeRadioButton.doClick();
+//		setUDPOptionsEnabled(false);
+//		setTCPOptionsEnabled(true);
+//		tcpRadioButton.doClick();
+//
+//		serverPort.setValue(5001);
+//		testPort.setValue(5001);
+//		tcpBufferLength.setValue(2);
+//		tcpBufferSizeUnit.setSelectedItem(IperfUnit.MBYTES);
+//		tcpWindowSize.setValue(56);
+//		tcpWindowSizeUnit.setSelectedItem(IperfUnit.KBYTES);
+//		mss.setValue(1);
+//		mssUnit.setSelectedItem(IperfUnit.KBYTES);
+//
+//		udpBufferSize.setValue(41);
+//		udpBufferSizeUnit.setSelectedItem(IperfUnit.KBYTES);
+//		udpPacketSize.setValue(1500);
+//		udpPacketSizeUnit.setSelectedItem(IperfUnit.BYTES);
+//
+//		// desactivate compatibility mode
+//		compatibilityMode.setSelected(true);
+//		compatibilityMode.doClick();
+//
+//		// desactivate IPv6
+//		ipv6.setSelected(true);
+//		ipv6.doClick();
+//
+//		// deselect dualmode and trademode
+//		dualMode.setSelected(false);
+//		tradeMode.setSelected(false);
+//	}
 
 	private void setClientModeSelected(boolean clientModeSelected)
 	{
@@ -976,7 +1082,95 @@ public class JPerfUI extends JFrame
 			iperfCommandLabel.setText(ex.getMessage());
 		}
 	}
-
+	
+	private void _compatibilityMode_actionPerformed()
+	{
+		if (compatibilityMode.isSelected())
+		{
+			lb_testingMode.setEnabled(false);
+			dualMode.setEnabled(false);
+			tradeMode.setEnabled(false);
+			lb_testPort.setEnabled(false);
+			testPort.setEnabled(false);
+		}
+		else
+		{
+			if (!serverModeRadioButton.isSelected())
+			{
+				lb_testingMode.setEnabled(true);
+				dualMode.setEnabled(true);
+				tradeMode.setEnabled(true);
+				lb_testPort.setEnabled(true);
+				testPort.setEnabled(true);
+			}
+		}
+	}
+	
+	private void _lb_clientLimit_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _transmitBytesRadioButton_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _transmitSecondsRadioButton_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _dualMode_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _tradeMode_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _printMSS_actionPerformed()
+	{
+		// nothing
+	}
+	
+	private void _lb_tcpBufferLength_actionPerformed()
+	{
+		tcpBufferLength.setEnabled(lb_tcpBufferLength.isSelected());
+		tcpBufferSizeUnit.setEnabled(lb_tcpBufferLength.isSelected());
+	}
+	
+	private void _lb_tcpWindowSize_actionPerformed()
+	{
+		tcpWindowSize.setEnabled(lb_tcpWindowSize.isSelected());
+		tcpWindowSizeUnit.setEnabled(lb_tcpWindowSize.isSelected());
+	}
+	
+	private void _lb_mss_actionPerformed()
+	{
+		mss.setEnabled(lb_mss.isSelected());
+		mssUnit.setEnabled(lb_mss.isSelected());
+	}
+	
+	private void _lb_udpBufferSize_actionPerformed()
+	{
+		udpBufferSize.setEnabled(lb_udpBufferSize.isSelected());
+		udpBufferSizeUnit.setEnabled(lb_udpBufferSize.isSelected());
+	}
+	
+	private void _lb_udpPacketSize_actionPerformed()
+	{
+		udpPacketSize.setEnabled(lb_udpPacketSize.isSelected());
+		udpPacketSizeUnit.setEnabled(lb_udpPacketSize.isSelected());
+	}
+	
+	private void _tcpNoDelay_actionPerformed()
+	{
+		// nothing
+	}
+	
 	public void actionPerformed(final ActionEvent e)
 	{
 		SwingUtilities.invokeLater(new Runnable()
@@ -1000,50 +1194,55 @@ public class JPerfUI extends JFrame
 				}
 				else if (source == compatibilityMode)
 				{
-					if (compatibilityMode.isSelected())
-					{
-						lb_testingMode.setEnabled(false);
-						dualMode.setEnabled(false);
-						tradeMode.setEnabled(false);
-						lb_testPort.setEnabled(false);
-						testPort.setEnabled(false);
-					}
-					else
-					{
-						if (!serverModeRadioButton.isSelected())
-						{
-							lb_testingMode.setEnabled(true);
-							dualMode.setEnabled(true);
-							tradeMode.setEnabled(true);
-							lb_testPort.setEnabled(true);
-							testPort.setEnabled(true);
-						}
-					}
+					_compatibilityMode_actionPerformed();
+				}
+				else if (source == lb_clientLimit)
+				{
+					_lb_clientLimit_actionPerformed();
+				}
+				else if (source == transmitBytesRadioButton)
+				{
+					_transmitBytesRadioButton_actionPerformed();
+				}
+				else if (source == transmitSecondsRadioButton)
+				{
+					_transmitSecondsRadioButton_actionPerformed();
+				}
+				else if (source == dualMode)
+				{
+					_dualMode_actionPerformed();
+				}
+				else if (source == tradeMode)
+				{
+					_tradeMode_actionPerformed();
+				}
+				else if (source == printMSS)
+				{
+					_printMSS_actionPerformed();
 				}
 				else if (source == lb_tcpBufferLength)
 				{
-					tcpBufferLength.setEnabled(lb_tcpBufferLength.isSelected());
-					tcpBufferSizeUnit.setEnabled(lb_tcpBufferLength.isSelected());
+					_lb_tcpBufferLength_actionPerformed();
 				}
 				else if (source == lb_tcpWindowSize)
 				{
-					tcpWindowSize.setEnabled(lb_tcpWindowSize.isSelected());
-					tcpWindowSizeUnit.setEnabled(lb_tcpWindowSize.isSelected());
+					_lb_tcpWindowSize_actionPerformed();
 				}
 				else if (source == lb_mss)
 				{
-					mss.setEnabled(lb_mss.isSelected());
-					mssUnit.setEnabled(lb_mss.isSelected());
+					_lb_mss_actionPerformed();
 				}
 				else if (source == lb_udpBufferSize)
 				{
-					udpBufferSize.setEnabled(lb_udpBufferSize.isSelected());
-					udpBufferSizeUnit.setEnabled(lb_udpBufferSize.isSelected());
+					_lb_udpBufferSize_actionPerformed();
 				}
 				else if (source == lb_udpPacketSize)
 				{
-					udpPacketSize.setEnabled(lb_udpPacketSize.isSelected());
-					udpPacketSizeUnit.setEnabled(lb_udpPacketSize.isSelected());
+					_lb_udpPacketSize_actionPerformed();
+				}
+				else if (source == tcpNoDelay)
+				{
+					_tcpNoDelay_actionPerformed();
 				}
 				else
 				{
@@ -1051,7 +1250,7 @@ public class JPerfUI extends JFrame
 		
 					if (command == "Restore")
 					{
-						applyDefaultValues();
+						applyConfiguration(defaultConfiguration);
 					}
 					else if (command == "TCP")
 					{
