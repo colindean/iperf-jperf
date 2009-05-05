@@ -1,8 +1,10 @@
 -------------------------------------------------------------------------------
 2009-05 Nicolas Richasse <nicolas.richasse@gmail.com>
 
+* import/export feature implemented
 * WaitWindow behavior and UI improved (the one displayed when stopping iperf)
 * System Look'n feel used under windows
+* UI improvements
 * Code improvements
 
 -------------------------------------------------------------------------------

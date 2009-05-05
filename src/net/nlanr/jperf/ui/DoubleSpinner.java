@@ -32,7 +32,7 @@ public class DoubleSpinner extends JSpinner
 		this(min, max, 1.0, initialValue);
 	}
 	
-	public Object getValue()
+	public Double getValue()
 	{
 		Object val = super.getValue();
 		if (val instanceof Number)
@@ -41,7 +41,7 @@ public class DoubleSpinner extends JSpinner
 		}
 		else
 		{
-			return spinnerNumberModel.getMinimum();
+			return ((Number)spinnerNumberModel.getMinimum()).doubleValue();
 		}
 	}
 }

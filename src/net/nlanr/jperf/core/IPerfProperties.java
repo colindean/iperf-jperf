@@ -194,7 +194,7 @@ public class IPerfProperties
 	
 	public void put(String key, int value)
 	{
-		properties.put(key, value);
+		properties.put(key, ""+value);
 	}
 	
 	public int getInteger(String key, int defaultValue)
@@ -212,7 +212,7 @@ public class IPerfProperties
 	
 	public void put(String key, double value)
 	{
-		properties.put(key, value);
+		properties.put(key, ""+value);
 	}
 	
 	public double getDouble(String key, double defaultValue)
@@ -230,7 +230,7 @@ public class IPerfProperties
 	
 	public void put(String key, boolean value)
 	{
-		properties.put(key, value);
+		properties.put(key, ""+value);
 	}
 	
 	public boolean getBoolean(String key, boolean defaultValue)

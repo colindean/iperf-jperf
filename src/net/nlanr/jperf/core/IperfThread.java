@@ -112,7 +112,6 @@ public class IperfThread extends Thread
 							
 							if (!isServerMode)
 							{
-								
 								try
 								{
 									process.getInputStream().close();
@@ -186,10 +185,11 @@ public class IperfThread extends Thread
 							
 							synchronized(waitWindowMutex)
 							{
-								frame.setStoppedStatus();
 								waitWindow.setVisible(false);
-								frame.setEnabled(true);
+								waitWindow.dispose();
 								waitWindow = null;
+								frame.setStoppedStatus();
+								frame.setEnabled(true);
 							}
 						}
 					};

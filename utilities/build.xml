@@ -5,7 +5,7 @@
 	<property name="project.release.dir" value="${project.root}/release"/>
 	<property name="project.release.distrib.generic.dir" value="${project.release.dir}/jperf-generic"/>
 	<property name="project.name" value="jperf"/>
-	<property name="project.filename" value="jperf-2.0.1"/>
+	<property name="project.filename" value="jperf-2.0.2"/>
 	<property name="project.release.distrib.dir" value="${project.release.dir}/${project.filename}"/>
 	
 	<path id="project.classpath">
