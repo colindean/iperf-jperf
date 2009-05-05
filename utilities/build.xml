@@ -45,6 +45,12 @@
 		<copy todir="${project.release.distrib.dir}/lib">
 			<fileset dir="${project.lib.dir}" />
 		</copy>
+		<copy todir="${project.release.distrib.dir}">
+			<fileset dir="${project.root}">
+				<include name="ChangeLog"/>
+				<include name="README.txt"/>
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="create zipped distrib" depends="release">
