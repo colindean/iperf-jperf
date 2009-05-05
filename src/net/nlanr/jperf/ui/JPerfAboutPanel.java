@@ -91,7 +91,31 @@ public class JPerfAboutPanel extends JPanel
 		// add developers information
 		JPanel devPanel = new JPanel();
 		devPanel.setLayout(new BoxLayout(devPanel, BoxLayout.Y_AXIS));
-		JLabel dev = new JLabel("Mark Gates");
+		
+		JLabel dev;
+		
+		dev = new JLabel("  ");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		
+		dev = new JLabel("JPerf 2.x.x developers:");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		dev = new JLabel("Nicolas Richasse");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		
+		dev = new JLabel("  ");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		dev = new JLabel("  ");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		
+		dev = new JLabel("JPerf 1.x.x developers:");
+		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
+		devPanel.add(dev);
+		dev = new JLabel("Mark Gates");
 		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
 		devPanel.add(dev);
 		dev = new JLabel("Ajay Tirumala");
@@ -110,9 +134,6 @@ public class JPerfAboutPanel extends JPanel
 		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
 		devPanel.add(dev);
 		dev = new JLabel("Tanya Brethour");
-		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
-		devPanel.add(dev);
-		dev = new JLabel("Nicolas Richasse");
 		dev.setAlignmentX(Component.CENTER_ALIGNMENT);
 		devPanel.add(dev);
 		dev = new JLabel("National Laboratory for Applied Network Research (NLANR)");
