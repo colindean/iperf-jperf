@@ -80,7 +80,7 @@ public class IPerfProperties
 	public static final double DEFAULT_UDP_BANDWIDTH = 1;
 	
 	public static final String KEY_UDP_BANDWIDTH_UNIT = "udp-bandwidth-unit";
-	public static final IperfSpeedUnit DEFAULT_UDP_BANDWIDTH_UNIT = IperfSpeedUnit.MEGABYTES_PERSEC;
+	public static final IperfSpeedUnit DEFAULT_UDP_BANDWIDTH_UNIT = IperfSpeedUnit.MEGABITS_PERSEC;
 	
 	public static final String KEY_UDP_BUFFER_SIZE = "udp-buffer-size";
 	public static final double DEFAULT_UDP_BUFFER_SIZE = 41;

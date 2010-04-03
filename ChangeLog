@@ -1,3 +1,8 @@
+2010-04-02 Wenbo Yang 
+* "use bits/sec rather than bytes/sec
+* improve jperf.sh to understand symbolic links
+* tracker patch 2825190
+
 -------------------------------------------------------------------------------
 2009-05 Nicolas Richasse <nicolas.richasse@gmail.com>
 

@@ -816,7 +816,7 @@ public class JPerfUI extends JFrame
 			udpForm.addCell(udpBandwidth);
 			udpBandwidthUnit = new JComboBox(IperfSpeedUnit.values());
 			udpBandwidthUnit.addActionListener(this);
-			udpBandwidthUnit.setSelectedItem(IperfSpeedUnit.MEGABYTES_PERSEC);
+			udpBandwidthUnit.setSelectedItem(IperfSpeedUnit.MEGABITS_PERSEC);
 			udpForm.addCell(udpBandwidthUnit);
 
 			udpForm.newLine();
