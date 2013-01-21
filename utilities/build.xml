@@ -7,6 +7,10 @@
 	<property name="project.name" value="jperf"/>
 	<property name="project.filename" value="jperf-2.0.2"/>
 	<property name="project.release.distrib.dir" value="${project.release.dir}/${project.filename}"/>
+	<property name="project.release.distrib.macdir" value="${project.release.distrib.dir}-mac"/>
+	<property name="project.filename.macapp" value="${project.name}.app"/>
+	<property name="project.release.distrib.macdmg" value="${project.filename}.dmg"/>
+	<property name="project.release.distrib.macapp" value="${project.release.distrib.macdir}/${project.filename.macapp}"/>
 	
 	<path id="project.classpath">
 		<fileset dir="${project.lib.dir}">
@@ -61,4 +65,34 @@
 			</fileset>
 		</zip>
 	</target>
+
+	<target name="macapp" depends="release">
+		<mkdir dir="${project.release.distrib.macapp}"/>
+		<mkdir dir="${project.release.distrib.macapp}/Contents/"/>
+		<copy todir="${project.release.distrib.macapp}/Contents/">
+			<fileset dir="${project.release.dir}/macapp/jperf.app/Contents"/>
+		</copy>
+
+		<copy file="${project.release.dir}/macapp/images/jperf.icns"
+		todir="${project.release.distrib.macapp}/Contents/Resources/"/>
+
+		<mkdir dir="${project.release.distrib.macapp}/Contents/Resources/Java/"/>
+		<copy file="${project.release.distrib.dir}/${project.name}.jar"
+			todir="${project.release.distrib.macapp}/Contents/Resources/Java/"/>
+		<copy todir="${project.release.distrib.macapp}/Contents/Resources/Java/">
+			<fileset dir="${project.release.distrib.dir}/lib"/>
+		</copy>
+		<chmod file="${project.release.distrib.macapp}/Contents/MacOS/JavaApplicationStub"
+			perm="700"/>
+	</target>
+
+	<target name="macdist" depends="macapp">
+		<exec dir="${project.release.distrib.macdir}" executable="hdiutil">
+			<arg line="create -ov -srcfolder ${project.filename.macapp} ${project.release.distrib.macdmg}"/>
+		</exec>
+		<exec dir="${project.release.distrib.macdir}" executable="hdiutil">
+			<arg line="internet-enable -yes ${project.release.distrib.macdmg}"/>
+		</exec>
+	</target>
+
 </project>

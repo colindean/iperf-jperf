@@ -1,3 +1,8 @@
+2013-01-20 Colin Dean <git@cad.cx>
+* Add OS X packaging and distribution build targets
+* Add rudimentary application icon
+
+-------------------------------------------------------------------------------
 2010-04-02 Wenbo Yang 
 * "use bits/sec rather than bytes/sec
 * improve jperf.sh to understand symbolic links
