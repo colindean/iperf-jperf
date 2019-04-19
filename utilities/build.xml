@@ -28,7 +28,7 @@
 		
 		<mkdir dir="${project.release.distrib.dir}/classes"/>
 		<javac 
-			target="1.5"
+			target="1.6"
 			classpathref="project.classpath"
 			destdir="${project.release.distrib.dir}/classes">
 			<src path="${project.src.dir}"/>
